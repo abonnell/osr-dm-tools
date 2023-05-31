@@ -18,13 +18,11 @@ export default function UnderclockCard({}) {
 	useEffect(() => {
 		if (countdown === 0) {
 			// Trigger Omen
-			console.log("spooky omen");
 			setCountdown(3);
 		}
 
 		if (countdown < 0) {
 			// Trigger Encounter
-			console.log("o shit fight");
 			setCountdown(countdownMax);
 		}
 	}, [countdown, countdownMax]);
@@ -35,6 +33,12 @@ export default function UnderclockCard({}) {
 		let result = explodingSixes();
 		setCountdown(countdown - result);
 	};
+
+	// TODO
+	const triggerOmen = () => {};
+
+	// TODO
+	const triggerEncounter = () => {};
 
 	return (
 		<Card>
