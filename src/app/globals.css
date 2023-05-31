@@ -105,6 +105,10 @@ a {
   text-decoration: none;
 }
 
+a:hover {
+  color: var(--secondary-main)
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
