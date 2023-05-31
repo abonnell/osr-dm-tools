@@ -1,63 +1,95 @@
 "use client";
 import {
-	Button,
-	Card,
-	CardActions,
-	CardContent,
-	CardMedia,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Box,
+  Typography,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 
 import { explodingSixes, rolldX } from "@/utils/dice";
 
-export default function UnderclockCard({}) {
-	const [auto, setAuto] = useState(true);
-	const [countdown, setCountdown] = useState("20");
-	const [countdownMax, setCountdownMax] = useState(20);
+export default function UnderclockCard() {
+  // Open modal to set auto or irl roll controls
+  const [auto, setAuto] = useState(true);
+  const [countdown, setCountdown] = useState("20");
+  const [countdownMax, setCountdownMax] = useState(20);
 
-	useEffect(() => {
-		if (countdown === 0) {
-			// Trigger Omen
-			setCountdown(3);
-		}
+  const [lastRoll, setLastRoll] = useState(null);
 
-		if (countdown < 0) {
-			// Trigger Encounter
-			setCountdown(countdownMax);
-		}
-	}, [countdown, countdownMax]);
+  useEffect(() => {
+    if (countdown === 0) {
+      // Trigger Omen
+      setCountdown(3);
+    }
 
-	// const buttonConfig = ["-1", "-2", "-3", "-4", "-5", "-6"];
+    if (countdown < 0) {
+      // Trigger Encounter
+      setCountdown(countdownMax);
+    }
+  }, [countdown, countdownMax]);
 
-	const subtractFromClock = () => {
-		let result = explodingSixes();
-		setCountdown(countdown - result);
-	};
+  // const buttonConfig = ["-1", "-2", "-3", "-4", "-5", "-6"];
 
-	// TODO
-	const triggerOmen = () => {};
+  const subtractFromClock = () => {
+    let { result, history } = explodingSixes();
+    setCountdown(countdown - result);
+    setLastRoll(history.join(", "));
+  };
 
-	// TODO
-	const triggerEncounter = () => {};
+  // TODO
+  const triggerOmen = () => {};
 
-	return (
-		<Card>
-			<CardMedia>sss</CardMedia>
-			<CardContent>{countdown}</CardContent>
-			<CardActions>
-				{auto && (
-					<Button onClick={() => subtractFromClock()}>
-						Roll the die!
-					</Button>
-				)}
-				{/* {buttonConfig.map((e) => {
+  // TODO
+  const triggerEncounter = () => {};
+
+  return (
+    <Box
+      sx={{
+        p: "1rem",
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "1rem",
+      }}
+    >
+      {/* pls be same height */}
+      {/* its some pb disparity */}
+      <Card>
+        <CardContent>
+          <Typography variant="h2">{countdown}</Typography>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography>Previous Result:</Typography>
+          <Typography>{lastRoll ?? "..."}</Typography>
+        </CardContent>
+        <CardActions>
+          {auto && (
+            <Button onClick={() => subtractFromClock()}>
+              <Typography>Roll the die!</Typography>
+            </Button>
+          )}
+          {/* {buttonConfig.map((e) => {
 					return (
 						<Button key={e} onClick={() => subtractFromClock(e)}>
 							{e}
 						</Button>
 					);
 				})} */}
-			</CardActions>
-		</Card>
-	);
+        </CardActions>
+      </Card>
+    </Box>
+  );
 }
