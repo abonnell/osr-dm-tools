@@ -9,10 +9,12 @@ import {
   Typography,
   Grid,
   Dialog,
+  DialogTitle,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 
 import { explodingdXs, rolldX } from "@/utils/dice";
+import RestDialog from "./RestDialog";
 
 export default function UnderclockCard() {
   // Open modal to set auto or irl roll controls
@@ -21,23 +23,54 @@ export default function UnderclockCard() {
   const [currentUnderDie, setCurrentUnderDie] = useState(6);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [lastRoll, setLastRoll] = useState(null);
+  const [eventTriggered, setEventTriggered] = useState([
+    { encounter: false },
+    { omen: false },
+  ]);
 
+  /*
+    -1: Encounter
+    0: Omen
+    1: Rest
+ */
+  const [hasRestFinished, setHasRestFinished] = useState(1);
+
+  // Countdown effect handler
   useEffect(() => {
     if (countdown === 0) {
-      // Trigger Omen
       setCountdown(3);
     }
 
     if (countdown === 3) {
+      // Trigger Omen
       setLastRoll((lastRoll) => lastRoll + " Omen!");
+      setEventTriggered([{ encounter: false }, { omen: true }]);
     }
 
     if (countdown < 0) {
       // Trigger Encounter
       setCountdown(20);
       setLastRoll((lastRoll) => lastRoll + " Random Encounter!");
+      setEventTriggered([{ encounter: true }, { omen: false }]);
     }
   }, [countdown]);
+
+  // Encounter effect handler
+  useEffect(() => {
+    const [encounter, omen] = eventTriggered;
+
+    if (encounter.encounter === true) {
+      // Handle encounter
+      setEventTriggered([{ encounter: false }, { omen: false }]);
+      setHasRestFinished(-1);
+    }
+
+    if (omen.omen === true) {
+      // Handle omen
+      setEventTriggered([{ encounter: false }, { omen: false }]);
+      setHasRestFinished(0);
+    }
+  }, [eventTriggered]);
 
   // const buttonConfig = ["-1", "-2", "-3", "-4", "-5", "-6"];
 
@@ -47,13 +80,32 @@ export default function UnderclockCard() {
     setLastRoll(history.join(", "));
   };
 
-  const restInTheDungeon = () => {
-    // Open a Modal with two choices
-    // Safe rest, which is no rolls
-    // Unsafe rest, 3 step slider 1-3
-    // Encounter ends the rest early
-    // Note to cross off a ration
-    // Increase die size
+  const handleRest = (dangerLevel) => {
+    // Issue is that setState is being called in a loop and the requests are stacking too hard
+    // Don't do it in a loop?
+    let restHistory = [];
+    let restResult = 0;
+    let flatHist = [];
+
+    for (let index = 0; index < dangerLevel; index++) {
+      const { result, history } = explodingdXs(currentUnderDie);
+      restResult += result;
+      restHistory = [...restHistory, history];
+    }
+    restHistory.forEach((e) => {
+      if (e.length === 1) flatHist.push(e[0]);
+      if (e.length === 2) {
+        e.forEach((ee) => {
+          flatHist.push(ee);
+        });
+      }
+    });
+    setCountdown(countdown - restResult);
+    setLastRoll(flatHist.join(", "));
+  };
+
+  const dialogClose = () => {
+    setIsDialogOpen(false);
   };
 
   // TODO
@@ -64,10 +116,13 @@ export default function UnderclockCard() {
 
   return (
     <Grid container spacing={2} sx={{ padding: "1rem 0 1rem 0" }}>
-      <Dialog
-        onClose={() => setIsDialogOpen(false)}
-        open={dialogIsOpen}
-      ></Dialog>
+      <RestDialog
+        isDialogOpen={isDialogOpen}
+        dialogClose={dialogClose}
+        handleRest={handleRest}
+        hasRestFinished={hasRestFinished}
+        resetHasRestFinished={() => setHasRestFinished(1)}
+      />
       {/* Counter Card */}
       <Grid item xs={6}>
         <Card sx={{ height: "100%" }}>
@@ -112,7 +167,11 @@ export default function UnderclockCard() {
                 <Button onClick={() => subtractFromClock()}>
                   <Typography>Roll the die!</Typography>
                 </Button>
-                <Button onClick={() => setIsDialogOpen(true)}>
+                <Button
+                  onClick={() => {
+                    setIsDialogOpen(true);
+                  }}
+                >
                   <Typography>Rest in the dungeon!</Typography>
                 </Button>
               </>
