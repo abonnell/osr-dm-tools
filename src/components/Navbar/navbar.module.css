@@ -2,6 +2,10 @@
   padding-right: 1rem;
 }
 
+.navItem:hover {
+  color: var(--primary-main)
+}
+
 .currentPage {
-  color: red
+  color: var(--primary-main)
 }

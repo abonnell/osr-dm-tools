@@ -70,6 +70,11 @@
     --callout-border-rgb: 108, 108, 108;
     --card-rgb: 100, 100, 100;
     --card-border-rgb: 200, 200, 200;
+
+    --primary-main: #ffc107;
+    --secondary-main: #448aff;
+    --warning-main: #ed6c02;
+    --info-main: #0288d1;
   }
 }
 
